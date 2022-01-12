@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Optional;
 
 @RestController
@@ -29,9 +30,9 @@ public class WeatherController {
     @GetMapping(value = "/temperature", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "get temperature")
-    public ResultModel<Integer> getTemperature(@RequestParam(value = "province", defaultValue = "江苏") String province,
-                                               @RequestParam(value = "city", defaultValue = "苏州") String city,
-                                               @RequestParam(value = "county", defaultValue = "苏州") String county
+    public ResultModel<Integer> getTemperature(@NotBlank(message = "不能为空") @RequestParam(value = "province", defaultValue = "江苏") String province,
+                                               @NotBlank(message = "不能为空") @RequestParam(value = "city", defaultValue = "苏州") String city,
+                                               @NotBlank(message = "不能为空") @RequestParam(value = "county", defaultValue = "苏州") String county
     ) {
         Location location = new Location(province, city, county);
         Optional<Integer> tempOptional = weatherService.getTemperature(modelMapper.map(location, LocationDTO.class));

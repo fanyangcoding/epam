@@ -29,13 +29,6 @@ public class GlobalExceptionHandler {
     /**
      * Business Exception Handler
      */
-//    @ResponseBody
-//    @ExceptionHandler(value = RestClientException.class)
-//    public ResultModel<?> restClientException(HttpServletRequest httpServletRequest, RestClientException e) {
-//        logger.error("rest client exception", e);
-//        return new ResultModel<>(ResultStatus.FAIL, e.getMessage());
-//    }
-
     @ResponseBody
     @ExceptionHandler(value = BusinessException.class)
     public ResultModel<?> businessExceptionHandler(HttpServletRequest httpServletRequest, BusinessException e) {
