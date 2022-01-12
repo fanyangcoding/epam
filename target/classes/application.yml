@@ -1,6 +1,0 @@
-server:
-  port: 8088
-swagger:
-  basic:
-    enable: false
-

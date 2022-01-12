@@ -32,58 +32,62 @@ public class WeatherServiceImpl implements WeatherService {
     private RestTemplate restTemplate;
 
     @Override
-    @Retryable(value = RestClientException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
-    public Optional<Integer> getTemperature(LocationDTO locationDTO) throws RestClientException { // 查询温度
-//        String responseStr = restTemplate.getForObject("http://jsonplaceholder.typicode.com/postss/1", String.class);
+    @Retryable(value = {RestClientException.class, BusinessException.class}, maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
+    public Optional<Integer> getTemperature(LocationDTO locationDTO) throws RestClientException, BusinessException { // 查询温度
         // 查省级代码
-        String provinceCode = null;
-        String provCodeStr = restTemplate.getForEntity(Constants.PROVINCE_CODE_HTML_PREFIX + "china" + Constants.HTML_SUFFIX, String.class).getBody();
-        Gson gson = new Gson();
-        JsonObject provinceObject = gson.fromJson(provCodeStr, JsonObject.class);
-        for (Map.Entry<String, JsonElement> entry : provinceObject.entrySet()) {
-            if (locationDTO.getProvince().equals(entry.getValue().getAsString())) {
-                provinceCode = entry.getKey();
-                break;
-            }
-        }
+        String provinceCode = this.getCode(Constants.PROVINCE_CODE_HTML_PREFIX + "china" + Constants.HTML_SUFFIX, locationDTO.getProvince());
         Optional.ofNullable(provinceCode).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "没有该省"));
         // 查市级代码
-        String cityCode = null;
-        String cityCodeStr = restTemplate.getForObject(Constants.CITY_CODE_HTML_PREFIX + provinceCode + Constants.HTML_SUFFIX, String.class);
-        JsonObject cityObject = gson.fromJson(cityCodeStr, JsonObject.class);
-        for (Map.Entry<String, JsonElement> entry : cityObject.entrySet()) {
-            if (locationDTO.getCity().equals(entry.getValue().getAsString())) {
-                cityCode = entry.getKey();
-                break;
-            }
-        }
+        String cityCode = this.getCode(Constants.CITY_CODE_HTML_PREFIX + provinceCode + Constants.HTML_SUFFIX, locationDTO.getCity());
         Optional.ofNullable(cityCode).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "省内没有该市"));
-        // 查县区代码
-        String countyCode = null;
-        String countyCodeStr = restTemplate.getForObject(Constants.COUNTY_CODE_HTML_PREFIX + provinceCode + cityCode + Constants.HTML_SUFFIX, String.class);
-        JsonObject countyObject = gson.fromJson(countyCodeStr, JsonObject.class);
-        for (Map.Entry<String, JsonElement> entry : countyObject.entrySet()) {
-            if (locationDTO.getCounty().equals(entry.getValue().getAsString())) {
-                countyCode = entry.getKey();
-                break;
-            }
-        }
-        Optional.ofNullable(countyCode).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "市内没有该县/区"));
+        // 查区县代码
+        String countyCode = this.getCode(Constants.COUNTY_CODE_HTML_PREFIX + provinceCode + cityCode + Constants.HTML_SUFFIX, locationDTO.getCounty());
+        Optional.ofNullable(countyCode).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "市内没有该区、县"));
         // 获取温度
-        String tempStr;
-        String weatherCodeStr = restTemplate.getForObject(Constants.WEATHER_COUNTY_HTML_PREFIX + provinceCode + cityCode + countyCode + Constants.HTML_SUFFIX, String.class);
-        JsonObject weatherObject = gson.fromJson(weatherCodeStr, JsonObject.class);
-        JsonObject weatherInfoObject = weatherObject.getAsJsonObject("weatherinfo");
-        tempStr = weatherInfoObject.get("temp").getAsString();
-        Optional.ofNullable(tempStr).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "没有该地区的温度"));
-        double tempDouble = Double.parseDouble(tempStr);
-        Integer temp = new Long(Math.round(tempDouble)).intValue();
+        // 直辖市的citycode和countycode反了！！！
+        String weatherUrl = Constants.WEATHER_COUNTY_HTML_PREFIX + provinceCode + cityCode + countyCode + Constants.HTML_SUFFIX;
+        if ("北京".equals(locationDTO.getCounty()) || "上海".equals(locationDTO.getCity()) || "天津".equals(locationDTO.getCity()) || "重庆".equals(locationDTO.getCity())) {
+            weatherUrl = Constants.WEATHER_COUNTY_HTML_PREFIX + provinceCode + countyCode + cityCode + Constants.HTML_SUFFIX;
+        }
+        Integer temp = this.getWeather(weatherUrl);
+        Optional.ofNullable(temp).orElseThrow(() -> new BusinessException(ResultStatus.FAIL.getCode(), "没有该地区的温度"));
         return Optional.of(temp);
     }
 
+    public Integer getWeather(String url) {
+        Gson gson = new Gson();
+        String weatherCodeStr = restTemplate.getForObject(url, String.class);
+        JsonObject weatherObject = gson.fromJson(weatherCodeStr, JsonObject.class);
+        JsonObject weatherInfoObject = weatherObject.getAsJsonObject("weatherinfo");
+        String tempStr = weatherInfoObject.get("temp").getAsString();
+        double tempDouble = Double.parseDouble(tempStr);
+        return new Long(Math.round(tempDouble)).intValue();
+    }
+
+
+    public String getCode(String url, String location) {
+        String code = null;
+        String codeStr = restTemplate.getForObject(url, String.class);
+        Gson gson = new Gson();
+        JsonObject locationObject = gson.fromJson(codeStr, JsonObject.class);
+        for (Map.Entry<String, JsonElement> entry : locationObject.entrySet()) {
+            if (location.equals(entry.getValue().getAsString())) {
+                code = entry.getKey();
+                break;
+            }
+        }
+        return code;
+    }
+
     @Recover
-    public Optional<Integer> recover(RestClientException e, LocationDTO locationDTO) {
-        log.error("重连失败");
+    public Optional<Integer> recoverRestClientException(RestClientException e, LocationDTO locationDTO) {
+        log.error("网络原因，重连失败");
         return Optional.empty();
+    }
+
+    @Recover
+    public Optional<Integer> recoverBusinessException(BusinessException e, LocationDTO locationDTO) {
+        log.error("业务异常");
+        throw new BusinessException(ResultStatus.FAIL.getCode(), e.getMsg());
     }
 }

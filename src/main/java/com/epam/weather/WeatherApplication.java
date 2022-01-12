@@ -12,7 +12,7 @@ import org.springframework.retry.annotation.EnableRetry;
  */
 
 @SpringBootApplication
-@EnableRetry(proxyTargetClass = false)
+@EnableRetry(proxyTargetClass = true)
 public class WeatherApplication {
     public static void main(String[] args) {
         SpringApplication.run(WeatherApplication.class, args);

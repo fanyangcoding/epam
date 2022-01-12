@@ -29,6 +29,13 @@ public class GlobalExceptionHandler {
     /**
      * Business Exception Handler
      */
+//    @ResponseBody
+//    @ExceptionHandler(value = RestClientException.class)
+//    public ResultModel<?> restClientException(HttpServletRequest httpServletRequest, RestClientException e) {
+//        logger.error("rest client exception", e);
+//        return new ResultModel<>(ResultStatus.FAIL, e.getMessage());
+//    }
+
     @ResponseBody
     @ExceptionHandler(value = BusinessException.class)
     public ResultModel<?> businessExceptionHandler(HttpServletRequest httpServletRequest, BusinessException e) {
@@ -36,13 +43,10 @@ public class GlobalExceptionHandler {
         return new ResultModel<>(ResultStatus.FAIL, "business exception, because: " + e.getMsg());
     }
 
-
     @ResponseBody
     @ExceptionHandler(value = JsonSyntaxException.class)
     public ResultModel<?> jsonSyntaxException(HttpServletRequest httpServletRequest, JsonSyntaxException e) {
         logger.error("json syntax exception", e);
         return new ResultModel<>(ResultStatus.FAIL, "json syntax: " + e.getMessage());
     }
-
-
 }
