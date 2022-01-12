@@ -42,4 +42,11 @@ public class GlobalExceptionHandler {
         logger.error("json syntax exception", e);
         return new ResultModel<>(ResultStatus.FAIL, "json syntax: " + e.getMessage());
     }
+
+    @ResponseBody
+    @ExceptionHandler(value = APIException.class)
+    public ResultModel<?> apiException(HttpServletRequest httpServletRequest, APIException e) {
+        logger.error("限流", e);
+        return new ResultModel<>(ResultStatus.FAIL, e.getMsg());
+    }
 }

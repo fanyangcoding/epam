@@ -1,13 +1,10 @@
 package com.epam.weather.controller;
 
-import com.epam.weather.exception.BusinessException;
 import com.epam.weather.response.ResultModel;
 import com.google.gson.Gson;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -60,7 +57,7 @@ public class WeatherControllerTest {
     }
 
     @Test
-    public void getTemperature_exception1() throws Exception {
+    public void getTemperature_exception() throws Exception {
         request = get("/api/v1/weather/temperature")
                 .param("province", "江苏")
                 .param("city", "苏州")

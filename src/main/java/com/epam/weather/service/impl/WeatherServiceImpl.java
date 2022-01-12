@@ -2,7 +2,6 @@ package com.epam.weather.service.impl;
 
 import com.epam.weather.domain.dto.LocationDTO;
 import com.epam.weather.exception.BusinessException;
-import com.epam.weather.ratelimit.Limiting;
 import com.epam.weather.response.ResultStatus;
 import com.epam.weather.service.WeatherService;
 import com.epam.weather.utils.Constants;
@@ -33,8 +32,7 @@ public class WeatherServiceImpl implements WeatherService {
     private RestTemplate restTemplate;
 
     @Override
-//    @Retryable(value = {RestClientException.class, BusinessException.class}, maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
-    @Limiting(limitNum = 10, name = "temperature")
+    @Retryable(value = {RestClientException.class, BusinessException.class}, maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
     public Optional<Integer> getTemperature(LocationDTO locationDTO) throws RestClientException, BusinessException { // 查询温度
         // 查省级代码
         String provinceCode = this.getCode(Constants.PROVINCE_CODE_HTML_PREFIX + "china" + Constants.HTML_SUFFIX, locationDTO.getProvince());

@@ -1,5 +1,6 @@
 package com.epam.weather.config;
 
+import com.epam.weather.exception.APIException;
 import com.epam.weather.exception.BusinessException;
 import com.epam.weather.response.ResultStatus;
 import com.google.common.util.concurrent.RateLimiter;
@@ -47,7 +48,7 @@ public class LimitInterceptor extends HandlerInterceptorAdapter {
 //            double count = limiter.acquire();
 //            return super.preHandle(request, response, handler);
 //        }
-        throw new BusinessException(ResultStatus.FAIL.getCode(), "达到请求上限，开始限流");
+        throw new APIException(ResultStatus.FAIL.getCode(), "达到请求上限，开始限流");
     }
 
     @Override
