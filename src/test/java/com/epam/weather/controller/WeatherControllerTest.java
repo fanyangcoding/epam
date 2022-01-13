@@ -1,6 +1,7 @@
 package com.epam.weather.controller;
 
 import com.epam.weather.response.ResultModel;
+import com.epam.weather.response.ResultStatus;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class WeatherControllerTest {
     }
 
     @Test
-    public void getTemperature() throws Exception {
+    public void getTemperature_suzhou() throws Exception {
         request = get("/api/v1/weather/temperature")
                 .param("province", "江苏")
                 .param("city", "苏州")
@@ -53,15 +54,15 @@ public class WeatherControllerTest {
         String content = mvcResult.getResponse().getContentAsString();
         Gson gson = new Gson();
         ResultModel<?> resultModel = gson.fromJson(content, ResultModel.class);
-        Assertions.assertEquals("0", resultModel.getCode());
+        Assertions.assertEquals(24.0, resultModel.getData());
     }
 
     @Test
-    public void getTemperature_exception() throws Exception {
+    public void getTemperature_shanghai() throws Exception {
         request = get("/api/v1/weather/temperature")
-                .param("province", "江苏")
-                .param("city", "苏州")
-                .param("county", "suzhou")
+                .param("province", "上海")
+                .param("city", "上海")
+                .param("county", "上海")
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult mvcResult = mvc.perform(request)
@@ -70,6 +71,23 @@ public class WeatherControllerTest {
         String content = mvcResult.getResponse().getContentAsString();
         Gson gson = new Gson();
         ResultModel<?> resultModel = gson.fromJson(content, ResultModel.class);
-        Assertions.assertEquals("-1", resultModel.getCode());
+        Assertions.assertEquals(24.0, resultModel.getData());
+    }
+
+    @Test
+    public void getTemperature_exception_handler() throws Exception {
+        request = get("/api/v1/weather/temperature")
+                .param("province", "江苏")
+                .param("city", "无锡")
+                .param("county", "苏州")
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult mvcResult = mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        Gson gson = new Gson();
+        ResultModel<?> resultModel = gson.fromJson(content, ResultModel.class);
+        Assertions.assertEquals(ResultStatus.FAIL.getCode(), resultModel.getCode());
     }
 }

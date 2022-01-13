@@ -33,21 +33,21 @@ public class WeatherServiceImplTest {
     public void getTemperature_exception() throws BusinessException {
         LocationDTO locationDTO = new LocationDTO();
         locationDTO.setProvince("江苏");
-        locationDTO.setCounty("苏州");
-        locationDTO.setCity("suzhou");
+        locationDTO.setCounty("无锡");
+        locationDTO.setCity("苏州");
         weatherService.getTemperature(locationDTO);
     }
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
-//    @Test
-//    public void getTemperature_exception1() throws BusinessException {
-//        expectedEx.expect(BusinessException.class);
-//        LocationDTO locationDTO = new LocationDTO();
-//        locationDTO.setProvince("浙江");
-//        locationDTO.setCounty("苏州");
-//        locationDTO.setCity("苏州");
-//        weatherService.getTemperature(locationDTO);
-//    }
+    @Test
+    public void getTemperature_exception_expected() {
+        expectedEx.expect(BusinessException.class);
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setProvince("江苏");
+        locationDTO.setCounty("苏州");
+        locationDTO.setCity("suzhou");
+        weatherService.getTemperature(locationDTO);
+    }
 }

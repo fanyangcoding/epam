@@ -6,6 +6,8 @@ import com.epam.weather.response.ResultModel;
 import com.epam.weather.response.ResultStatus;
 import com.epam.weather.service.WeatherService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -30,9 +32,14 @@ public class WeatherController {
     @GetMapping(value = "/temperature", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "get temperature")
-    public ResultModel<Integer> getTemperature(@NotBlank(message = "不能为空") @RequestParam(value = "province", defaultValue = "江苏") String province,
-                                               @NotBlank(message = "不能为空") @RequestParam(value = "city", defaultValue = "苏州") String city,
-                                               @NotBlank(message = "不能为空") @RequestParam(value = "county", defaultValue = "苏州") String county
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "省、直辖市或自治区", name = "province", defaultValue = "江苏", required = true, dataType = "string", paramType = "query"),
+            @ApiImplicitParam(value = "市", name = "city", defaultValue = "苏州", required = true, dataType = "string", paramType = "query"),
+            @ApiImplicitParam(value = "区、县", name = "county", defaultValue = "苏州", required = true, dataType = "string", paramType = "query")
+    })
+    public ResultModel<Integer> getTemperature(@NotBlank(message = "不能为空") @RequestParam(value = "province") String province,
+                                               @NotBlank(message = "不能为空") @RequestParam(value = "city") String city,
+                                               @NotBlank(message = "不能为空") @RequestParam(value = "county") String county
     ) {
         Location location = new Location(province, city, county);
         Optional<Integer> tempOptional = weatherService.getTemperature(modelMapper.map(location, LocationDTO.class));
