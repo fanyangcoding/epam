@@ -18,10 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 获取天气
@@ -96,11 +94,7 @@ public class WeatherServiceImpl implements WeatherService {
 
     // 是否是直辖市
     public boolean isMunicipality(String city) {
-        List<String> exist = Lists.newArrayList(Constants.MUNICIPALITY)
-                .stream()
-                .filter(city::equals)
-                .collect(Collectors.toList());
-        return !exist.isEmpty();
+        return Lists.newArrayList(Constants.MUNICIPALITY).contains(city);
     }
 
     @Recover
