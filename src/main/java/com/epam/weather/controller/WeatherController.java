@@ -37,9 +37,9 @@ public class WeatherController {
             @ApiImplicitParam(value = "市", name = "city", defaultValue = "苏州", required = true, dataType = "string", paramType = "query"),
             @ApiImplicitParam(value = "区、县", name = "county", defaultValue = "苏州", required = true, dataType = "string", paramType = "query")
     })
-    public ResultModel<Integer> getTemperature(@NotBlank(message = "不能为空") @RequestParam(value = "province") String province,
-                                               @NotBlank(message = "不能为空") @RequestParam(value = "city") String city,
-                                               @NotBlank(message = "不能为空") @RequestParam(value = "county") String county
+    public ResultModel<Integer> getTemperature(@NotBlank(message = "请填写省、直辖市或自治区") @RequestParam(value = "province") String province,
+                                               @NotBlank(message = "请填写市") @RequestParam(value = "city") String city,
+                                               @NotBlank(message = "请填写区、县") @RequestParam(value = "county") String county
     ) {
         Location location = new Location(province, city, county);
         Optional<Integer> tempOptional = weatherService.getTemperature(modelMapper.map(location, LocationDTO.class));

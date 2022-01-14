@@ -31,14 +31,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WeatherServiceImpl implements WeatherService {
 
-    public final String INITIAL_CODE = "00000";
+    public final String INITIAL_CODE = "00000000";
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Override
     @Retryable(value = {RestClientException.class, BusinessException.class}, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
-    public Optional<Integer> getTemperature(LocationDTO locationDTO) throws RestClientException {
+    public Optional<Integer> getTemperature(LocationDTO locationDTO) throws RestClientException, BusinessException {
         // 查省级代码
         String provinceCode = this.getCode(
                 Constants.PROVINCE_CODE_HTML_PREFIX + "china" + Constants.HTML_SUFFIX, locationDTO.getProvince());
@@ -58,15 +58,14 @@ public class WeatherServiceImpl implements WeatherService {
             throw new BusinessException(ResultStatus.FAIL.getCode(), "市内没有该区、县");
         }
         // 获取温度
-
         String weatherUrl = Constants.WEATHER_COUNTY_HTML_PREFIX + provinceCode + cityCode + countyCode + Constants.HTML_SUFFIX;
         if (isMunicipality(locationDTO.getCity())) {
-            // 直辖市的citycode和countycode反了！！！
+            // 直辖市的citycode和countycode位置反了！！！
             weatherUrl = Constants.WEATHER_COUNTY_HTML_PREFIX + provinceCode + countyCode + cityCode + Constants.HTML_SUFFIX;
         }
         Integer temp = this.getWeather(weatherUrl);
         Optional.ofNullable(temp).orElseThrow(() ->
-                new BusinessException(ResultStatus.FAIL.getCode(), "没有该地区的温度"));
+                new BusinessException(ResultStatus.FAIL.getCode(), "没有该地区的气温"));
         return Optional.of(temp);
     }
 
