@@ -4,6 +4,9 @@ import com.epam.weather.domain.dto.LocationDTO;
 import com.epam.weather.exception.BusinessException;
 import com.epam.weather.service.WeatherService;
 import com.epam.weather.utils.Constants;
+
+
+import com.example.starter.MyStarter;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,6 +26,9 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WeatherServiceImplTest {
+
+    @Autowired
+    private MyStarter myStarterService;
 
     @Autowired
     private WeatherService weatherService;
@@ -88,8 +94,8 @@ public class WeatherServiceImplTest {
             }
         }
         Assertions.assertEquals("10119", code);
-//        Assertions.assertEquals("04", code);
-//        Assertions.assertEquals("01", code);
+        Assertions.assertEquals("04", code);
+        Assertions.assertEquals("01", code);
     }
 
     @Test
@@ -110,8 +116,5 @@ public class WeatherServiceImplTest {
         Integer temp = new Long(Math.round(tempDouble)).intValue();
 
         Assertions.assertNotNull(temp);
-
     }
-
-
 }

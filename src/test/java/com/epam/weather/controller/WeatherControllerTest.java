@@ -90,4 +90,6 @@ public class WeatherControllerTest {
         ResultModel<?> resultModel = gson.fromJson(content, ResultModel.class);
         Assertions.assertEquals(ResultStatus.FAIL.getCode(), resultModel.getCode());
     }
+
+
 }
